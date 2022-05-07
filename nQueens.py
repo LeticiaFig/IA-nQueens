@@ -8,6 +8,7 @@ class NQueens():
   def __init__(self, numberOfQueens, method, maxIterations) -> None:
       self.method = method
       self.numberOfQueens = numberOfQueens
+      self.history = []
       self.initialPositions = self.randomPositions()
       self.currentPositions = self.initialPositions 
       self.history = [self.initialPositions]    
@@ -21,7 +22,8 @@ class NQueens():
     possiblePositions = list(range(1, self.numberOfQueens+1))
     
     while((possiblePositions[0] in [1, self.numberOfQueens]) 
-      or possiblePositions[self.numberOfQueens-1] in [1, self.numberOfQueens]):
+      or possiblePositions[self.numberOfQueens-1] in [1, self.numberOfQueens]
+      or possiblePositions in self.history):
       shuffle(possiblePositions)
     
     return possiblePositions
@@ -47,65 +49,42 @@ class NQueens():
 
       print('Number of conflicts: ', self.currentViolations)
       
-      # if(random()*10<2):
-      #   neighboars = [sample(self.initialPositions, self.numberOfQueens)]        
-      # else:
-      #   neighboars = self.getAllNeighboards(self.currentPositions)
-
-      # minViolations = violations
-      # bestNeighboard = self.currentPositions
-
-      # for neighboard in neighboars:
-      #   currentViolations = self.counterOfAllViolations(neighboard)
-        
-      #   if(currentViolations < minViolations):
-      #     minViolations = currentViolations
-      #     bestNeighboard = neighboard
-      #     break
-
-      bestNeighboard = self.getBestNeighboard(self.currentPositions)
-          
-
-      self.currentPositions = bestNeighboard  
-      self.history.append(self.currentPositions.copy())
-      #violations = minViolations  
-
+      self.currentPositions = self.getBestNeighboard(self.currentPositions)                
+      
     print('Number of iterations: ', self.countIterations)
     if(self.currentViolations == 0): self.solved = True
 
-  def getAllNeighboards(self, board):
-    neighboards = []
-
-    for i, line in enumerate(board):
-      for j, line in enumerate(board[i+1: len(board)]):
-        neighboard = board.copy()
-        neighboard[i], neighboard[i+j+1] = neighboard[i+j+1], neighboard[i] 
-        
-        if(neighboard not in self.history):
-          neighboards.append(neighboard)
-
-    return neighboards 
 
   def getBestNeighboard(self, board):
     bestNeighboard = []
+    secondOption = []
 
-    for i, line in enumerate(board):
-      for j, line in enumerate(board[i+1: len(board)]):
+    for i, line1 in enumerate(board):
+      for j, line2 in enumerate(board[i+1: len(board)]):
         neighboard = board.copy()
         neighboard[i], neighboard[i+j+1] = neighboard[i+j+1], neighboard[i] 
 
         currentViolations = self.counterOfAllViolations(neighboard)
         
-        if(currentViolations < self.currentViolations and neighboard not in self.history):
-          self.currentViolations = currentViolations
-          bestNeighboard = neighboard
-          break
-  
-    if(len(bestNeighboard) == 0 or random()*100<20):
-      bestNeighboard = board.copy()
-      shuffle(bestNeighboard)
+        if(neighboard not in self.history):
+          self.history.append(neighboard.copy())
+          if(currentViolations < self.currentViolations):
+            self.currentViolations = currentViolations
+            bestNeighboard = neighboard
+            break
+        
+          if(currentViolations == self.currentViolations):
+            secondOption = neighboard
 
-    return bestNeighboard 
+          
+    if(len(bestNeighboard) == 0 and len(secondOption) == 0):
+      bestNeighboard = secondOption.copy()      
+  
+    if(len(bestNeighboard) == 0 or random()*100<0.5):
+      bestNeighboard = self.randomPositions()
+      self.currentViolations = self.counterOfAllViolations(bestNeighboard)
+      
+    return bestNeighboard
 
 
   def counterOfAllViolations(self, board):

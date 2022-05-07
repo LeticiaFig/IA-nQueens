@@ -1,8 +1,6 @@
-from random import random, sample, shuffle
-
 from nQueens import NQueens
 import time
-numberOfQueens = 10
+numberOfQueens = 30
 numberOfIterations = 10
 maxInterations = 100
 sum = 0
